@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
+import 'dart:math';
 
 var display = '';
 var history = '';
@@ -17,8 +17,9 @@ class _calcustate extends State<Calcu> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color(0xff222222),
-        body: SafeArea(
-            child: Center(
+        body: SingleChildScrollView(
+            child: SafeArea(
+                child: Center(
           child: Column(children: [
             Stack(children: <Widget>[
               Container(
@@ -83,12 +84,17 @@ class _calcustate extends State<Calcu> {
             ]),
             SizedBox(width: 15, height: 15),
             Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              // Textbtn(text: 'ANS', onpress: addans),
+              Textbtn(text: 'ANS', onpress: addans),
               Textbtn(text: 'AC', onpress: clearall),
               EnterButton(text: "=", onpress: eval)
             ])
           ]),
-        )));
+        ))));
+  }
+
+  double roundDouble(double value, int places) {
+    num mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
   }
 
   void addnum(String x) {
@@ -109,11 +115,10 @@ class _calcustate extends State<Calcu> {
     setState(() => display += ' $x ');
   }
 
-  // void addans(String x) {
-  //   setState(() => display += ans);
-  //   print(ans);
-  //   dis_ans = false;
-  // }
+  void addans(String x) {
+    setState(() => display += ans);
+    dis_ans = false;
+  }
 
   void clearall(String x) {
     setState(() => history = '');
@@ -131,22 +136,33 @@ class _calcustate extends State<Calcu> {
 
   void eval(String y) {
     setState(() {
-      double _out = 0.0;
-      history = y;
-      List x = y.split(' ');
-      if (x.length == 3) {
-        if (x[1] == "+") {
-          _out = double.parse(x[0]) + double.parse(x[2]);
-        } else if (x[1] == "-") {
-          _out = double.parse(x[0]) - double.parse(x[2]);
-        } else if (x[1] == "x") {
-          _out = double.parse(x[0]) * double.parse(x[2]);
-        } else if (x[1] == "/") {
-          _out = double.parse(x[0]) / double.parse(x[2]);
+      if (y != Null) {
+        double _out = 0.0;
+        history = y;
+        List x = y.split(' ');
+        if (x.length == 3) {
+          if (x[1] == "+") {
+            _out = double.parse(x[0]) + double.parse(x[2]);
+          } else if (x[1] == "-") {
+            _out = double.parse(x[0]) - double.parse(x[2]);
+          } else if (x[1] == "x") {
+            _out = double.parse(x[0]) * double.parse(x[2]);
+          } else if (x[1] == "/") {
+            _out = double.parse(x[0]) / double.parse(x[2]);
+          }
+          dis_ans = true;
+          String d = _out.toString();
+          if (d.split(' ').length == 1) {
+            ans = roundDouble(_out, 8).toString();
+            display = roundDouble(_out, 8).toString();
+          } else {
+            ans = 'Error';
+            display = 'Error';
+          }
         }
-        dis_ans = true;
-        ans = _out.toString();
-        display = _out.toString();
+      } else {
+        ans = 'Error';
+        display = 'Error';
       }
     });
   }
@@ -200,7 +216,7 @@ class EnterButton extends StatelessWidget {
             elevation: 5,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
-            fixedSize: Size(140, 80)),
+            fixedSize: Size(130, 80)),
         onPressed: () => onpress(display),
         child: Container(
           padding: EdgeInsets.all(15),
@@ -232,7 +248,7 @@ class Textbtn extends StatelessWidget {
             elevation: 5,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
-            fixedSize: Size(140, 80)),
+            fixedSize: Size(100, 80)),
         onPressed: () => onpress(text),
         child: Container(
           padding: EdgeInsets.all(15),
